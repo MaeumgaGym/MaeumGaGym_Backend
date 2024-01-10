@@ -24,6 +24,7 @@ import javax.validation.constraints.Pattern
 class PickleController(
     private val loadRecommendationPicklesUseCase: LoadRecommendationPicklesUseCase,
     private val loadPickleFromIdUseCase: LoadPickleFromIdUseCase,
+    private val loadPicklesFromPoseUseCase: LoadPicklesFromPoseUseCase,
     private val pickleUploadUseCase: PickleUploadUseCase,
     private val pickleDeleteUseCase: PickleDeleteUseCase,
     private val updatePickleUseCase: UpdatePickleUseCase,
@@ -44,6 +45,13 @@ class PickleController(
         @Pattern(regexp = "^[0-9a-fA-F]{8}$", message = "잘못된 id입니다.")
         id: String?
     ): PickleResponse = loadPickleFromIdUseCase.loadPickleFromId(id!!)
+
+    @Operation(summary = "자세 관련 피클 조회 API")
+    @GetMapping("/pose/{poseId}")
+    fun picklesLoadFromPose(
+        @PathVariable(name = "poseId")
+        poseId: Long?
+    ): PickleListResponse = loadPicklesFromPoseUseCase.loadPicklesFromPose(poseId!!)
 
     @Operation(summary = "PreSignedUploadURL 조회 API")
     @GetMapping("/url")

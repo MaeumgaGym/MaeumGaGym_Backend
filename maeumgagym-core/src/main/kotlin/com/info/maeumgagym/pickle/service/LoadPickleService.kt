@@ -7,18 +7,22 @@ import com.info.maeumgagym.pickle.exception.PickleNotFoundException
 import com.info.maeumgagym.pickle.exception.ThereNoPicklesException
 import com.info.maeumgagym.pickle.model.Pickle
 import com.info.maeumgagym.pickle.port.`in`.LoadPickleFromIdUseCase
+import com.info.maeumgagym.pickle.port.`in`.LoadPicklesFromPoseUseCase
 import com.info.maeumgagym.pickle.port.`in`.LoadRecommendationPicklesUseCase
 import com.info.maeumgagym.pickle.port.out.GenerateUploadURLPort
 import com.info.maeumgagym.pickle.port.out.ReadAllPicklesPort
 import com.info.maeumgagym.pickle.port.out.ReadPickleByIdPort
+import com.info.maeumgagym.pose.exception.PoseNotFoundException
+import com.info.maeumgagym.pose.port.out.FindPoseByIdPort
 import com.info.maeumgagym.user.dto.response.UserResponse
 
 @UseCase
 class LoadPickleService(
     private val readAllPicklesPort: ReadAllPicklesPort,
     private val readPickleByIdPort: ReadPickleByIdPort,
-    private val generateUploadURLPort: GenerateUploadURLPort
-) : LoadRecommendationPicklesUseCase, LoadPickleFromIdUseCase {
+    private val generateUploadURLPort: GenerateUploadURLPort,
+    private val readPoseByIdPort: FindPoseByIdPort
+) : LoadRecommendationPicklesUseCase, LoadPickleFromIdUseCase, LoadPicklesFromPoseUseCase {
 
     private companion object {
         const val INDEX_SIZE = 5
@@ -39,6 +43,23 @@ class LoadPickleService(
     override fun loadPickleFromId(id: String): PickleResponse =
         // (id = 파라미터)인 피클이 존재한다면 -> response, else -> 예외처리
         (readPickleByIdPort.readPickleById(id) ?: throw PickleNotFoundException).toResponse()
+
+    override fun loadPicklesFromPose(poseId: Long): PickleListResponse {
+        val pose = readPoseByIdPort.findById(poseId) ?: throw PoseNotFoundException
+
+        val allPickles = readAllPicklesPort.readAllPickles()
+        val pickles: MutableList<Pickle> = mutableListOf()
+        allPickles.map {
+            if (it.tags.contains(pose.simpleName) || it.tags.contains(pose.exactName)) {
+                pickles.add(it)
+            }
+        }
+
+        return PickleListResponse(
+            (if (pickles.size <= INDEX_SIZE) pickles else getRandomPickles(pickles))
+                .map { it.toResponse() }
+        )
+    }
 
     private fun getRandomPickles(pickles: List<Pickle>): List<Pickle> =
         mutableSetOf<Pickle>().apply {
