@@ -36,6 +36,14 @@ jobs:
           mysql database: 'maeumgagym'
           mysql root password: ${{ secrets.TEST_DB_PASSWORD }}
 
+      - name: gradle caching
+        uses: actions/cache@v3
+        with:
+            path: |
+                ~/.gradle/caches
+                ~/.gradle/wrapper
+            key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
       - name: Build gradle
         run: ./gradlew build
         env:

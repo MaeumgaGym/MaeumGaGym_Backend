@@ -5,4 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface PickleRepository : JpaRepository<PickleJpaEntity, String>
+interface PickleRepository : JpaRepository<PickleJpaEntity, String> {
+    fun existsByVideoId(videoId: String): Boolean
+}
+

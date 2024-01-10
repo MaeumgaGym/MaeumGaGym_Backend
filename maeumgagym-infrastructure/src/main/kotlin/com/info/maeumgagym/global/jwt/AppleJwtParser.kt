@@ -15,7 +15,7 @@ class AppleJwtParser(private val objectMapper: ObjectMapper) : AppleJwtParsePort
         private const val HEADER_INDEX = 0
     }
 
-    @Suppress("unchecked_cast")
+    @Suppress("unchecked_cast") // String Type으로 Casting 되지 않는 오류
     override fun parseHeaders(token: String): MutableMap<String?, String?> = try {
         // 인코딩된 토큰 슬라이싱
         val encodedHeader: String = token.split(IDENTITY_TOKEN_VALUE_DELIMITER.toRegex())[HEADER_INDEX]

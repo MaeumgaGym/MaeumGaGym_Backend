@@ -17,6 +17,7 @@ import io.jsonwebtoken.*
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.security.PublicKey
 import java.util.*
 
@@ -29,6 +30,7 @@ class JwtAdapter(
 ) : GenerateJwtPort, ReissuePort, GetJwtBodyPort {
 
     // 모든 토큰 발급
+    @Transactional
     override fun generateTokens(subject: String): TokenResponse {
         // access_token 발급
         val access = generateAccessToken()

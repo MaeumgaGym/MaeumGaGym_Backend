@@ -2,10 +2,10 @@ package com.info.maeumgagym.domain.pickle.entity
 
 import com.info.maeumgagym.TableNames
 import com.info.maeumgagym.domain.base.BaseLongIdTimeEntity
-import com.info.maeumgagym.domain.user.entity.UserJpaEntity
 import org.hibernate.annotations.SQLDelete
 import org.hibernate.annotations.Where
 import java.time.LocalDateTime
+import java.util.UUID
 import javax.persistence.*
 
 @Where(clause = "is_deleted = false")
@@ -13,28 +13,32 @@ import javax.persistence.*
 @Entity(name = TableNames.PICKLE_COMMENT_TABLE)
 class PickleCommentJpaEntity(
     content: String,
-    pickle: PickleJpaEntity,
-    writer: UserJpaEntity,
-    replies: MutableList<PickleReplyJpaEntity> = mutableListOf(),
+    videoId: String,
+    writerId: UUID,
     createdAt: LocalDateTime? = null,
-    id: Long? = null
+    id: Long? = null,
+    parentComment: PickleCommentJpaEntity? = null
 ) : BaseLongIdTimeEntity(id, createdAt) {
 
     @Column(name = "content", length = 1000, nullable = false)
     var content: String = content
         protected set
 
-    @ManyToOne
-    @JoinColumn(name = "pickle_id", updatable = false, nullable = false)
-    var pickle: PickleJpaEntity = pickle
+    @Column(name = "pickle_id", updatable = false, nullable = false)
+    var videoId: String = videoId
         protected set
 
-    @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-    var replies: MutableList<PickleReplyJpaEntity> = replies
+    @Column(name = "writer_id", columnDefinition = "BINARY(16)", updatable = false, nullable = false)
+    var writerId: UUID = writerId
+        protected set
 
-    @ManyToOne
-    @JoinColumn(name = "writer_id", updatable = false, nullable = false)
-    var writer: UserJpaEntity = writer
+    @JoinColumn(name = "parent_commnet_id", updatable = false, nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    var parentComment: PickleCommentJpaEntity? = parentComment
+        protected set
+
+    @OneToMany(mappedBy = "parentComment", orphanRemoval = true)
+    var childrenComments: MutableList<PickleCommentJpaEntity> = arrayListOf()
         protected set
 
     @Column(name = "is_deleted", nullable = false)

@@ -18,6 +18,11 @@ class WithdrawalUserService(
         // 토큰으로 유저 불러오기
         val user = readCurrentUserPort.readCurrentUser()
 
+        /* 탈퇴 후 토큰이 만료 되기 때문에, 애초에 UserNotFound 발생 -> 필요 X
+        * // 이미 탈퇴된 유저시 409
+        * if (existsDeletedUserByIdPort.existsByIdInNative(user.oauthId)) throw AlreadyWithdrawalUserException
+        */
+
         // user soft delete
         deleteUserPort.deleteUser(user)
 

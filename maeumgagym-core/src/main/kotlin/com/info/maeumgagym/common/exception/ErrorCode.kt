@@ -30,11 +30,13 @@ enum class ErrorCode(
     POSE_NOT_FOUND(404, "Pose Not Found"),
     PICKLE_NOT_FOUND(404, "Pickle Not Found"),
     ROUTINE_NOT_FOUND(404, "Routine Not Found"),
+    PICKLE_COMMENT_NOT_FOUND(404, "Pickle Comment Not Found"),
 
     // Bad Request
     ALREADY_WITHDRAWAL_USER(400, "Already Withdrawal User"),
     FILE_TYPE_MISS_MATCHED(400, "File, Type Miss Matched"),
     EXERCISE_LIST_CANNOT_EMPTY(400, "Exercise list cannot empty"),
+    PICKLE_MISMATCH(400, "Pickle Mismathce"),
 
     // Conflict
     DUPLICATED_NICKNAME(409, "Duplicated Nickname"),
