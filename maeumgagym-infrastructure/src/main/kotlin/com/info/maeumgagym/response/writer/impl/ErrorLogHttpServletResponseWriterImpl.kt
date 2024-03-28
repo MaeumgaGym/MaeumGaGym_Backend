@@ -1,6 +1,5 @@
 package com.info.maeumgagym.response.writer.impl
 
-import com.info.maeumgagym.common.exception.PresentationValidationException
 import com.info.maeumgagym.error.vo.ErrorLog
 import com.info.maeumgagym.response.writer.DefaultHttpServletResponseWriter
 import com.info.maeumgagym.response.writer.ErrorLogHttpServletResponseWriter
@@ -28,23 +27,14 @@ private class ErrorLogHttpServletResponseWriterImpl(
     ): HttpServletResponse =
         defaultHttpServletResponseWriter.doDefaultSettingWithStatusCode(response, status)
 
-    override fun writeResponseWithErrorLogAndException(
+    override fun writeResponseWithErrorLog(
         response: HttpServletResponse,
-        errorLog: ErrorLog,
-        e: Exception
+        errorLog: ErrorLog
     ): HttpServletResponse = response.apply {
         doDefaultSettingWithStatusCode(response, errorLog.status)
         setBody(
             response = response,
-            `object` = errorLog.let {
-                ErrorLogResponse(
-                    status = it.status,
-                    message = it.message,
-                    errorLogId = it.id,
-                    timestamp = it.timestamp,
-                    map = if (e is PresentationValidationException) e.fields else mapOf()
-                )
-            }
+            `object` = ErrorLogResponse.of(errorLog)
         )
     }
 }

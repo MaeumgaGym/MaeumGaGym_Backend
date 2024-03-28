@@ -2,6 +2,11 @@ package com.info.maeumgagym.filter.config
 
 import com.info.maeumgagym.error.filter.ErrorLogResponseFilter
 import com.info.maeumgagym.error.filter.ExceptionConvertFilter
+import com.info.maeumgagym.error.filter.filterchain.ExceptionChainedFilterChain
+import com.info.maeumgagym.error.filter.filterchain.ExceptionChainedFilterChainProxy
+import com.info.maeumgagym.error.repository.ExceptionRepository
+import com.info.maeumgagym.response.writer.DefaultHttpServletResponseWriter
+import com.info.maeumgagym.response.writer.ErrorLogHttpServletResponseWriter
 import com.info.maeumgagym.security.jwt.AuthenticationProvider
 import com.info.maeumgagym.security.jwt.JwtFilter
 import com.info.maeumgagym.security.jwt.JwtResolver
@@ -17,7 +22,10 @@ import org.springframework.stereotype.Component
 class SecurityFilterChainConfig(
     private val jwtResolver: JwtResolver,
     private val jwtProperties: JwtProperties,
-    private val authenticationProvider: AuthenticationProvider
+    private val authenticationProvider: AuthenticationProvider,
+    private val defaultHttpServletResponseWriter: DefaultHttpServletResponseWriter,
+    private val errorLogHttpServletResponseWriter: ErrorLogHttpServletResponseWriter,
+    private val exceptionRepository: ExceptionRepository
 ) : SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity>() {
 
     /**
@@ -31,6 +39,27 @@ class SecurityFilterChainConfig(
             addFilterBefore(
                 JwtFilter(jwtResolver, authenticationProvider, jwtProperties),
                 LogoutFilter::class.java
+            )
+            addFilterBefore(
+                ExceptionChainedFilterChainProxy(
+                    ExceptionChainedFilterChain(
+                        mapOf(
+                            Pair(
+                                ErrorLogResponseFilter::class.simpleName!!,
+                                ErrorLogResponseFilter(
+                                    defaultHttpServletResponseWriter,
+                                    errorLogHttpServletResponseWriter,
+                                    exceptionRepository
+                                )
+                            ),
+                            Pair(
+                                ExceptionConvertFilter::class.simpleName!!,
+                                ExceptionConvertFilter()
+                            )
+                        )
+                    )
+                ),
+                SecurityContextHolderFilter::class.java
             )
         }
     }

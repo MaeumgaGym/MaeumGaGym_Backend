@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.filter.GenericFilterBean
 import org.springframework.web.util.NestedServletException
+import java.time.DateTimeException
 import javax.servlet.FilterChain
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
@@ -73,6 +74,12 @@ class ExceptionConvertFilter : GenericFilterBean() {
 
                 else -> e.cause ?: e
             }
+        } catch (e: DateTimeException) {
+            throw PresentationValidationException(
+                status = 400,
+                message = "DateTime Format Wrong",
+                fields = mapOf()
+            )
         }
     }
 }

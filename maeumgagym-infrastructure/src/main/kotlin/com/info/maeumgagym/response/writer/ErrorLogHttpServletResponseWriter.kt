@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import javax.servlet.http.HttpServletResponse
 
 /**
- * [ErrorLog] 및 [Exception]을 [HttpServletResponse]로 작성하기 위한 [HttpServletResponseWriter].
+ * [ErrorLog]의 정보로 [HttpServletResponse]를 작성하기 위한 [HttpServletResponseWriter].
  *
  * [DefaultHttpServletResponseWriter]를 내부 변수로 갖고 있어, [setBody]와 [doDefaultSettingWithStatusCode]는 [DefaultHttpServletResponseWriter]를 통해 Proxy 형태로 구현됨.
  *
@@ -36,7 +36,7 @@ abstract class ErrorLogHttpServletResponseWriter : HttpServletResponseWriter {
     ): HttpServletResponse
 
     /**
-     * 인자로 받은 [ErrorLog]와 [Exception]의 정보를 기반으로 [HttpServletResponse]를 작성.
+     * 인자로 받은 [ErrorLog]의 정보를 기반으로 [HttpServletResponse]를 작성.
      *
      * 사용되는 정보는 [ErrorLogResponse]의 Docs 참고.
      *
@@ -45,10 +45,9 @@ abstract class ErrorLogHttpServletResponseWriter : HttpServletResponseWriter {
      * @author Daybreak312
      * @since 12-03-2024
      */
-    abstract fun writeResponseWithErrorLogAndException(
+    abstract fun writeResponseWithErrorLog(
         response: HttpServletResponse,
-        errorLog: ErrorLog,
-        e: Exception
+        errorLog: ErrorLog
     ): HttpServletResponse
 }
 
@@ -70,4 +69,18 @@ data class ErrorLogResponse(
     val errorLogId: String,
     val timestamp: LocalDateTime = LocalDateTime.now(),
     val map: Map<String, String> = mapOf()
-)
+) {
+
+    companion object {
+        fun of(errorLog: ErrorLog): ErrorLogResponse =
+            errorLog.run {
+                ErrorLogResponse(
+                    status = status,
+                    message = message,
+                    errorLogId = id,
+                    timestamp = timestamp,
+                    map = map
+                )
+            }
+    }
+}
